@@ -78,77 +78,80 @@ if (
 }
 
 /*********************************************************
- * 8. 게시글 목록
+ * 8. 게시글 목록 (페이징 및 검색 추가)
  *********************************************************/
-$stmt = db()->prepare("
-    SELECT b.*, u.username
+$page = intval($_GET['page'] ?? 1);
+$search = $_GET['search'] ?? '';
+$limit = 15;
+$offset = ($page - 1) * $limit;
+
+// 검색 조건
+$whereSql = "WHERE b.type = ?";
+$params = [$type];
+if ($search) {
+    $whereSql .= " AND (b.title LIKE ? OR b.content LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+}
+
+// 전체 개수
+$countStmt = db()->prepare("SELECT COUNT(*) FROM uedu_boards b $whereSql");
+$countStmt->execute($params);
+$totalCount = $countStmt->fetchColumn();
+$totalPages = ceil($totalCount / $limit);
+
+// 목록 조회
+$sql = "
+    SELECT b.*, u.username, u.name
     FROM uedu_boards b
-    LEFT JOIN users u ON b.user_id = u.id
-    WHERE b.type = ?
+    LEFT JOIN uedu_users u ON b.user_id = u.id
+    $whereSql
     ORDER BY b.id DESC
-    LIMIT 50
-");
-$stmt->execute([$type]);
+    LIMIT $limit OFFSET $offset
+";
+$stmt = db()->prepare($sql);
+$stmt->execute($params);
 $list = $stmt->fetchAll();
 ?>
 
-<!-- ================= HTML ================= -->
-
 <div class="container">
     <h2 class="page-title">고객센터 - <?= htmlspecialchars($type_name) ?></h2>
-
-    <div style="margin-bottom:20px;">
-        <a href="board.php?type=notice" class="btn <?= $type=='notice'?'btn-green':'btn-gray'?>">공지사항</a>
-        <a href="board.php?type=faq" class="btn <?= $type=='faq'?'btn-green':'btn-gray'?>">FAQ</a>
-        <a href="board.php?type=qna" class="btn <?= $type=='qna'?'btn-green':'btn-gray'?>">1:1문의</a>
-        <a href="board.php?type=bill" class="btn <?= $type=='bill'?'btn-green':'btn-gray'?>">계산서요청</a>
-    </div>
-
-    <?php if(in_array($type, ['qna', 'bill']) && isset($_SESSION['user_id'])): ?>
-    <div style="background:#f9f9f9; padding:15px; border-radius:5px; margin-bottom:30px;">
-        <h4>문의하기</h4>
-        <form method="POST">
-            <input type="text" name="title" placeholder="제목" required style="width:100%; margin-bottom:10px;">
-            <textarea name="content" placeholder="내용을 입력하세요" rows="3" style="width:100%;"></textarea>
-            <button type="submit" name="save_board" class="btn">등록</button>
-        </form>
-    </div>
-    <?php endif; ?>
+    
+    <form method="GET" style="text-align:right; margin-bottom:10px;">
+        <input type="hidden" name="type" value="<?= $type ?>">
+        <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="검색어 입력" class="input" style="width:200px; display:inline-block;">
+        <button class="btn btn-gray">검색</button>
+    </form>
 
     <table class="board-table">
-        <thead>
-            <tr>
-                <th>제목</th>
-                <th>작성자</th>
-                <th>작성일</th>
-                <th>상태</th>
-            </tr>
-        </thead>
         <tbody>
-        <?php foreach($list as $row): ?>
+        <?php if(empty($list)): ?>
+            <tr><td colspan="4" style="text-align:center; padding:30px;">게시글이 없습니다.</td></tr>
+        <?php else: ?>
+            <?php foreach($list as $row): ?>
             <tr>
                 <td>
-                    <strong><?= htmlspecialchars($row['title']) ?></strong><br>
-                    <small><?= nl2br(htmlspecialchars($row['content'])) ?></small>
-
-                    <?php if(!empty($row['answer'])): ?>
-                        <div style="background:#eef; padding:10px; margin-top:5px; border-radius:5px;">
-                            └ <strong>[답변]</strong>
-                            <?= nl2br(htmlspecialchars($row['answer'])) ?>
-                        </div>
+                    <strong><?= htmlspecialchars($row['title']) ?></strong>
+                    <?php if($row['created_at'] > date('Y-m-d H:i:s', strtotime('-1 day'))): ?>
+                        <span style="color:red; font-size:11px;">N</span>
                     <?php endif; ?>
-                </td>
-                <td><?= htmlspecialchars($row['username'] ?? '') ?></td>
-                <td><?= substr($row['created_at'], 0, 10) ?></td>
+                    </td>
                 <td>
-                    <?= !empty($row['answer'])
-                        ? '<span style="color:green">답변완료</span>'
-                        : '<span style="color:#999">대기중</span>' ?>
+                    <?= htmlspecialchars($row['username']) ?> 
+                    <?= !empty($row['name']) ? '('.htmlspecialchars($row['name']).')' : '' ?>
                 </td>
-            </tr>
-        <?php endforeach; ?>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
         </tbody>
     </table>
+
+    <div style="text-align:center; margin-top:20px;">
+        <?php for($i=1; $i<=$totalPages; $i++): ?>
+            <a href="?type=<?= $type ?>&page=<?= $i ?>&search=<?= urlencode($search) ?>" 
+               class="btn <?= $i==$page ? 'btn-green':'btn-gray' ?>" style="padding:5px 10px;"><?= $i ?></a>
+        <?php endfor; ?>
+    </div>
 </div>
 
 <?php

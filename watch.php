@@ -25,8 +25,8 @@ if (!$stmt->fetchColumn()) {
     exit;
 }
 
-/* 과정 옵션 */
-$stmt = db()->prepare("SELECT title, sequential_learning FROM uedu_courses WHERE id=?");
+/* 과정 옵션 (prevent_skip 추가 조회) */
+$stmt = db()->prepare("SELECT title, sequential_learning, prevent_skip FROM uedu_courses WHERE id=?");
 $stmt->execute([$course_id]);
 $course = $stmt->fetch();
 if (!$course) {
@@ -52,7 +52,7 @@ if (!$content) {
     exit;
 }
 
-/* 선수차시 제한: 옵션 ON이면 이전 차시가 모두 완료되어야 함 (우회 방지) */
+/* 선수차시 제한: 옵션 ON이면 이전 차시가 모두 완료되어야 함 */
 if (intval($course['sequential_learning']) === 1) {
     $myOrder = intval($content['chapter_order']);
 
@@ -100,7 +100,7 @@ $is_completed  = intval($progress['is_completed'] ?? 0);
     <h2 class="page-title"><?= htmlspecialchars($course['title']) ?> - <?= htmlspecialchars($content['title']) ?></h2>
 
     <div class="video-wrapper" style="max-width:900px;margin:0 auto;">
-        <video id="videoPlayer" controls width="100%">
+        <video id="videoPlayer" controls width="100%" controlsList="nodownload">
             <source src="<?= htmlspecialchars($content['video_url']) ?>" type="video/mp4">
             브라우저가 video 태그를 지원하지 않습니다.
         </video>
@@ -120,21 +120,47 @@ const video = document.getElementById('videoPlayer');
 const courseId  = <?= $course_id ?>;
 const contentId = <?= $content_id ?>;
 const duration  = <?= intval($content['duration']) ?>;
-const lastPos   = <?= $last_position ?>;
 
-/* 마지막 위치로 이동 */
+// DB 설정값 가져오기 (1이면 true, 0이면 false)
+const preventSkip = <?= intval($course['prevent_skip'] ?? 0) === 1 ? 'true' : 'false' ?>;
+
+// 서버에 저장된 마지막 시청 위치
+let maxWatchedTime = <?= $last_position ?>; 
+let isCompleted = <?= $is_completed ?>;
+
+/* 1. 로드 시 마지막 위치로 이동 */
 video.addEventListener('loadedmetadata', () => {
-  if (lastPos > 0 && duration > 0 && lastPos < duration) {
-    video.currentTime = lastPos;
+  if (maxWatchedTime > 0 && maxWatchedTime < duration) {
+    video.currentTime = maxWatchedTime;
   }
 });
 
-/* 5초마다 위치 저장 */
+/* 2. 스킵(Seeking) 방지 로직 */
+video.addEventListener('seeking', () => {
+    // 1. 이미 완료했거나, 2. 스킵 방지 옵션이 꺼져있으면 허용
+    if (isCompleted || !preventSkip) return;
+
+    // 이동하려는 시간이 지금까지 본 최대 시간 + 1초(오차 허용)보다 크면 차단
+    if (video.currentTime > maxWatchedTime + 1) {
+        alert("이 과정은 학습하지 않은 구간으로 건너뛸 수 없습니다.");
+        video.currentTime = maxWatchedTime; // 강제로 되돌림
+    }
+});
+
+/* 3. 재생 중 최대 시청 위치 갱신 */
+video.addEventListener('timeupdate', () => {
+    if (!video.seeking && video.currentTime > maxWatchedTime) {
+        maxWatchedTime = video.currentTime;
+    }
+});
+
+/* 4. 5초마다 진도 저장 */
 let t = null;
 video.addEventListener('timeupdate', () => {
   if (t) return;
   t = setTimeout(() => {
-    saveProgress(Math.floor(video.currentTime), 0);
+    // 시청 중에는 완료(1)로 보내지 않고 위치만 저장
+    saveProgress(Math.floor(maxWatchedTime), 0);
     t = null;
   }, 5000);
 });
@@ -144,9 +170,11 @@ video.addEventListener('pause', () => {
   saveProgress(Math.floor(video.currentTime), 0);
 });
 
-/* 종료 시 완료 처리 + 강의실 복귀 */
+/* 5. 영상 종료 시 완료 처리 + 강의실 복귀 */
 video.addEventListener('ended', () => {
+  isCompleted = 1;
   saveProgress(duration || Math.floor(video.duration), 1).then(() => {
+    alert("학습을 완료했습니다.");
     location.href = 'classroom.php?course_id=' + courseId;
   });
 });
@@ -163,6 +191,9 @@ function saveProgress(position, completed) {
     })
   }).catch(() => {});
 }
+
+/* (선택) 마우스 우클릭 방지 (다운로드 등 방지 목적) */
+document.addEventListener('contextmenu', event => event.preventDefault());
 </script>
 
 <?php require __DIR__ . '/layout_footer.php'; ?>

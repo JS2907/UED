@@ -24,8 +24,8 @@
     .row{display:flex;gap:12px;flex-wrap:wrap;}
     .col{flex:1;min-width:280px;}
     .input{width:90%;padding:10px;border:1px solid #ccc;border-radius:8px;}
-    .textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;min-height:110px;}
-    .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;}
+    .textarea{width:90%;padding:10px;border:1px solid #ccc;border-radius:8px;min-height:110px;}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;margin-top:5px;}
     .btn-green{background:#2c7;color:#fff;}
     .btn-gray{background:#ddd;color:#222;}
     .btn-red{background:#e55;color:#fff;}

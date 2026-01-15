@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/header_auth.php';
 require_once __DIR__ . '/db_conn.php';
+require_once __DIR__ . '/course_completion.php';
+
 
 $user_id   = $_SESSION['user_id'];
 $course_id = intval($_GET['course_id'] ?? 0);
@@ -27,26 +29,10 @@ if (!$course) {
     exit;
 }
 
-/* 전체 차시 수 */
-$stmt = db()->prepare("
-    SELECT COUNT(*) FROM uedu_curriculum WHERE course_id=?
-");
-$stmt->execute([$course_id]);
-$total = intval($stmt->fetchColumn());
+$evaluation = evaluate_completion($user_id, $course_id);
+$record = sync_completion_status($user_id, $course_id, $evaluation);
 
-/* 완료 차시 수 */
-$stmt = db()->prepare("
-    SELECT COUNT(*) 
-    FROM uedu_curriculum uc
-    JOIN uedu_progress p
-      ON p.content_id=uc.content_id
-     AND p.user_id=? AND p.course_id=? AND p.is_completed=1
-    WHERE uc.course_id=?
-");
-$stmt->execute([$user_id, $course_id, $course_id]);
-$done = intval($stmt->fetchColumn());
-
-if ($total === 0 || $done < $total) {
+if (($record['status'] ?? '') !== 'completed') {
     echo "<div class='container'>아직 수료 조건을 충족하지 못했습니다.</div>";
     require __DIR__ . '/layout_footer.php';
     exit;

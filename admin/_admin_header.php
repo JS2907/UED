@@ -61,9 +61,16 @@
      커리큘럼
   </a>
 
-  <a href="/uedu/admin/" class="muted">시험(다음)</a>
+  <a href="/uedu/admin/exams.php"
+     class="<?= (basename($_SERVER['PHP_SELF']) === 'exams.php') ? 'active' : '' ?>">
+     시험/평가
+  </a>
   <a href="/uedu/admin/orders.php"
      class="<?= (basename($_SERVER['PHP_SELF']) === 'orders.php') ? 'active' : '' ?>">
      주문/결제
+  </a>
+  <a href="/uedu/admin/completions.php"
+     class="<?= (basename($_SERVER['PHP_SELF']) === 'completions.php') ? 'active' : '' ?>">
+     수료관리
   </a>
 </nav>

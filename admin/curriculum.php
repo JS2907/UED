@@ -2,10 +2,27 @@
 require __DIR__ . '/_admin_guard.php';
 require __DIR__ . '/_admin_header.php';
 require_once __DIR__ . '/../db_conn.php';
+require_once __DIR__ . '/../course_completion.php';
 
 /* 과정 선택 */
 $course_id = intval($_GET['course_id'] ?? 0);
 $status = $_GET['status'] ?? '';
+
+/* 수료 기준 설정 저장 */
+if (isset($_POST['save_completion_settings']) && $course_id > 0) {
+    $progressRequired = max(0, min(100, intval($_POST['progress_required'] ?? 0)));
+    $examRequiredScore = max(0, min(100, intval($_POST['exam_required_score'] ?? 0)));
+    $examEnabled = isset($_POST['exam_enabled']) ? 1 : 0;
+    $completionMode = ($_POST['completion_mode'] ?? 'auto') === 'manual' ? 'manual' : 'auto';
+
+    if ($examEnabled === 0) {
+        $examRequiredScore = 0;
+    }
+
+    save_completion_settings($course_id, $progressRequired, $examRequiredScore, $examEnabled, $completionMode);
+    header("Location: curriculum.php?course_id=$course_id&status=completion_saved");
+    exit;
+}
 
 /* 영상 추가 */
 if (isset($_POST['add_content'])) {
@@ -239,6 +256,8 @@ if ($course_id) {
     <p class="badge on">차시 순서를 자동으로 정렬했습니다.</p>
 <?php elseif ($status === 'order_conflict'): ?>
     <p class="badge off">이미 사용 중인 순서입니다. 다른 번호를 선택하세요.</p>
+<?php elseif ($status === 'completion_saved'): ?>
+    <p class="badge on">수료 기준이 저장되었습니다.</p>
 <?php elseif ($status === 'invalid'): ?>
     <p class="badge off">요청이 올바르지 않습니다.</p>
 <?php endif; ?>
@@ -259,6 +278,51 @@ if ($course_id) {
 <?php if ($course_id): ?>
 
 <hr>
+
+<?php
+    $completionSettings = get_completion_settings($course_id);
+?>
+
+<div class="admin-card" style="margin-bottom:16px;">
+    <h4 style="margin-top:0;">수료 기준 설정</h4>
+    <form method="POST" class="row">
+        <div class="col">
+            <div class="muted">진도율 기준(%)</div>
+            <input class="input" type="number" name="progress_required" min="0" max="100"
+                   value="<?= intval($completionSettings['progress_required']) ?>">
+        </div>
+        <div class="col">
+            <div class="muted">시험 기준 점수</div>
+            <input class="input" type="number" name="exam_required_score" min="0" max="100"
+                   value="<?= intval($completionSettings['exam_required_score']) ?>">
+        </div>
+        <div class="col">
+            <div class="muted">시험 사용</div>
+            <label style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+                <input type="checkbox" name="exam_enabled"
+                       <?= intval($completionSettings['exam_enabled']) === 1 ? 'checked' : '' ?>>
+                <span class="muted">시험 포함</span>
+            </label>
+        </div>
+        <div class="col">
+            <div class="muted">수료 처리 방식</div>
+            <select class="input" name="completion_mode">
+                <option value="auto" <?= $completionSettings['completion_mode'] === 'auto' ? 'selected' : '' ?>>
+                    자동 처리
+                </option>
+                <option value="manual" <?= $completionSettings['completion_mode'] === 'manual' ? 'selected' : '' ?>>
+                    관리자 승인
+                </option>
+            </select>
+        </div>
+        <div class="col" style="display:flex;align-items:flex-end;">
+            <button class="btn btn-green" name="save_completion_settings">저장</button>
+        </div>
+    </form>
+    <p class="muted" style="margin-top:8px;">
+        시험을 끄면 진도율만으로 수료 조건을 판단합니다.
+    </p>
+</div>
 
 <?php if (count($availableContents) > 0): ?>
     <form method="POST" class="row">

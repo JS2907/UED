@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/header_auth.php';
 require_once __DIR__ . '/db_conn.php';
+require_once __DIR__ . '/course_completion.php';
 
 $user_id  = $_SESSION['user_id'];
 $course_id = intval($_GET['course_id'] ?? 0);
@@ -57,10 +58,49 @@ $list = $stmt->fetchAll();
 /* 잠금 로직 계산 */
 $canStudy = true;
 $sequential = intval($course['sequential_learning']) === 1;
+$evaluation = evaluate_completion($user_id, $course_id);
+$completionRecord = sync_completion_status($user_id, $course_id, $evaluation);
+$progressInfo = $evaluation['progress'];
+$activeExam = $evaluation['exam'];
+$examResult = $evaluation['exam_result'];
 ?>
 
 <div class="container">
     <h2 class="page-title"><?= htmlspecialchars($course['title']) ?> 강의실</h2>
+
+    <div class="board-view" style="margin-bottom:20px;">
+        <h3 style="margin-top:0;">학습 현황</h3>
+        <p>진도율: <strong><?= intval($progressInfo['progress']) ?>%</strong>
+           (완료 <?= intval($progressInfo['done']) ?>/<?= intval($progressInfo['total']) ?>차시)</p>
+        <?php if ($evaluation['exam_enabled']): ?>
+            <p>
+                시험 점수:
+                <strong>
+                    <?= $examResult ? intval($examResult['score']) . '점' : '미응시' ?>
+                </strong>
+                / 기준 <?= intval($evaluation['required_score']) ?>점
+            </p>
+        <?php else: ?>
+            <p>시험: <span class="muted">사용 안 함</span></p>
+        <?php endif; ?>
+        <p>
+            수료 상태:
+            <?php if (($completionRecord['status'] ?? '') === 'completed'): ?>
+                <span style="color:green;font-weight:bold;">수료 완료</span>
+            <?php elseif (($completionRecord['status'] ?? '') === 'pending'): ?>
+                <span style="color:#555;">승인 대기</span>
+            <?php else: ?>
+                <span style="color:#999;">미달성</span>
+            <?php endif; ?>
+        </p>
+        <?php if ($activeExam): ?>
+            <a class="btn btn-green" href="exam.php?course_id=<?= $course_id ?>">시험 응시</a>
+        <?php endif; ?>
+        <?php if (($completionRecord['status'] ?? '') === 'completed'): ?>
+            <a class="btn btn-gray" style="margin-left:8px;"
+               href="certificate.php?course_id=<?= $course_id ?>">수료증 보기</a>
+        <?php endif; ?>
+    </div>
 
     <?php if (empty($list)): ?>
         <p style="color:#666;">등록된 차시가 없습니다. (관리자에서 커리큘럼을 구성하세요)</p>

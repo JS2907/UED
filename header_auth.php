@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 require_once __DIR__ . '/db_conn.php';
 
 $stmt = db()->prepare("
-    SELECT id, username, role
+    SELECT id, username, role, name
     FROM uedu_users
     WHERE id = ?
 ");
@@ -42,6 +42,7 @@ if (!$user) {
             <a href="<?= BASE_URL ?>/index.php">UEDU</a>
         </h1>
         <nav class="gnb">
+            <a href="<?= BASE_URL ?>/courses.php">수강신청</a>
             <a href="<?= BASE_URL ?>/myroom.php">나의강의실</a>
             <a href="<?= BASE_URL ?>/board.php?type=qna">1:1문의</a>
             <?php if ($user['role'] === 'admin'): ?>
@@ -50,7 +51,7 @@ if (!$user) {
             <a href="<?= BASE_URL ?>/logout.php">로그아웃</a>
         </nav>
         <div class="user-info">
-            <?= htmlspecialchars($user['username']) ?> 님
+            <?= htmlspecialchars($user['name'] ?: $user['username']) ?> 님
         </div>
     </div>
 </header>

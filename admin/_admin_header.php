@@ -23,7 +23,7 @@
     .badge.off{background:#aaa;color:#fff;}
     .row{display:flex;gap:12px;flex-wrap:wrap;}
     .col{flex:1;min-width:280px;}
-    .input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;}
+    .input{width:90%;padding:10px;border:1px solid #ccc;border-radius:8px;}
     .textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;min-height:110px;}
     .btn{display:inline-block;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;}
     .btn-green{background:#2c7;color:#fff;}
@@ -45,10 +45,22 @@
     </div>
   </div>
 
-  <nav class="admin-nav">
-    <a href="/uedu/admin/index.php" class="<?= (basename($_SERVER['PHP_SELF'])==='index.php')?'active':'' ?>">대시보드</a>
-    <a href="/uedu/courses.php" class="<?= (basename($_SERVER['PHP_SELF'])==='courses.php' || basename($_SERVER['PHP_SELF'])==='course_edit.php')?'active':'' ?>">강의관리</a>
-    <a href="/uedu/admin/" class="muted">커리큘럼(다음)</a>
-    <a href="/uedu/admin/" class="muted">시험(다음)</a>
-    <a href="/uedu/admin/" class="muted">주문/결제(다음)</a>
-  </nav>
+<nav class="admin-nav">
+  <a href="/uedu/admin/index.php"
+     class="<?= (basename($_SERVER['PHP_SELF']) === 'index.php') ? 'active' : '' ?>">
+     대시보드
+  </a>
+
+  <a href="/uedu/admin/contents.php"
+     class="<?= (basename($_SERVER['PHP_SELF']) === 'contents.php') ? 'active' : '' ?>">
+     영상관리
+  </a>
+
+  <a href="/uedu/admin/curriculum.php"
+     class="<?= (basename($_SERVER['PHP_SELF']) === 'curriculum.php') ? 'active' : '' ?>">
+     커리큘럼
+  </a>
+
+  <a href="/uedu/admin/" class="muted">시험(다음)</a>
+  <a href="/uedu/admin/" class="muted">주문/결제(다음)</a>
+</nav>

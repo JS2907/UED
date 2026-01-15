@@ -14,16 +14,22 @@ $stmt = db()->query("
 ");
 $courses = $stmt->fetchAll();
 
-/* 내가 이미 수강 중인 과정 */
-$myCourses = [];
+/* 내가 이미 신청한 과정 상태 */
+$myOrders = [];
 if ($loggedIn) {
     $stmt = db()->prepare("
-        SELECT course_id
+        SELECT course_id, status
         FROM uedu_orders
-        WHERE user_id=? AND status='paid'
+        WHERE user_id=?
+        ORDER BY id DESC
     ");
     $stmt->execute([$user_id]);
-    $myCourses = array_column($stmt->fetchAll(), 'course_id');
+    foreach ($stmt->fetchAll() as $row) {
+        $courseId = intval($row['course_id']);
+        if (!isset($myOrders[$courseId])) {
+            $myOrders[$courseId] = $row['status'];
+        }
+    }
 }
 ?>
 
@@ -46,10 +52,15 @@ if ($loggedIn) {
                 <td><small><?= nl2br(htmlspecialchars($c['description'] ?? '')) ?></small></td>
                 <td><?= intval($c['price']) ?>원</td>
                 <td>
-                    <?php if ($loggedIn && in_array($c['id'], $myCourses)): ?>
+                    <?php if ($loggedIn && ($myOrders[$c['id']] ?? '') === 'paid'): ?>
                         <a class="btn btn-gray"
                            href="<?= BASE_URL ?>/classroom.php?course_id=<?= $c['id'] ?>">
                            강의실
+                        </a>
+                    <?php elseif ($loggedIn && ($myOrders[$c['id']] ?? '') === 'pending'): ?>
+                        <a class="btn btn-gray"
+                           href="<?= BASE_URL ?>/enroll.php?course_id=<?= $c['id'] ?>">
+                           입금대기
                         </a>
                     <?php else: ?>
                         <a class="btn btn-green"

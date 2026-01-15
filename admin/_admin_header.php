@@ -62,5 +62,8 @@
   </a>
 
   <a href="/uedu/admin/" class="muted">시험(다음)</a>
-  <a href="/uedu/admin/" class="muted">주문/결제(다음)</a>
+  <a href="/uedu/admin/orders.php"
+     class="<?= (basename($_SERVER['PHP_SELF']) === 'orders.php') ? 'active' : '' ?>">
+     주문/결제
+  </a>
 </nav>

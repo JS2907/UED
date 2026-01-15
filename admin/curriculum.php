@@ -13,6 +13,17 @@ if (isset($_POST['add_content'])) {
     $order = intval($_POST['chapter_order'] ?? 1);
 
     if ($course_id > 0 && $content_id > 0 && $order > 0) {
+        $maxOrderStmt = db()->prepare("
+            SELECT COALESCE(MAX(chapter_order), 0)
+            FROM uedu_curriculum
+            WHERE course_id = ?
+        ");
+        $maxOrderStmt->execute([$course_id]);
+        $maxOrder = intval($maxOrderStmt->fetchColumn());
+        if ($order > $maxOrder + 1) {
+            $order = $maxOrder + 1;
+        }
+
         $existsStmt = db()->prepare("
             SELECT COUNT(*) FROM uedu_curriculum
             WHERE course_id = ? AND content_id = ?
@@ -21,24 +32,32 @@ if (isset($_POST['add_content'])) {
         $already = intval($existsStmt->fetchColumn()) > 0;
 
         if (!$already) {
-            $orderStmt = db()->prepare("
-                SELECT COUNT(*) FROM uedu_curriculum
-                WHERE course_id = ? AND chapter_order = ?
-            ");
-            $orderStmt->execute([$course_id, $order]);
-            if (intval($orderStmt->fetchColumn()) > 0) {
-                header("Location: curriculum.php?course_id=$course_id&status=order_conflict");
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $shiftStmt = $pdo->prepare("
+                    UPDATE uedu_curriculum
+                    SET chapter_order = chapter_order + 1
+                    WHERE course_id = ? AND chapter_order >= ?
+                ");
+                $shiftStmt->execute([$course_id, $order]);
+                $shifted = $shiftStmt->rowCount() > 0;
+                $pdo->prepare("
+                    INSERT INTO uedu_curriculum (course_id, content_id, chapter_order)
+                    VALUES (?, ?, ?)
+                ")->execute([
+                    $course_id,
+                    $content_id,
+                    $order
+                ]);
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                header("Location: curriculum.php?course_id=$course_id&status=invalid");
                 exit;
             }
-            db()->prepare("
-                INSERT INTO uedu_curriculum (course_id, content_id, chapter_order)
-                VALUES (?, ?, ?)
-            ")->execute([
-                $course_id,
-                $content_id,
-                $order
-            ]);
-            header("Location: curriculum.php?course_id=$course_id&status=added");
+            $status = $shifted ? 'added_shifted' : 'added';
+            header("Location: curriculum.php?course_id=$course_id&status=$status");
             exit;
         }
         header("Location: curriculum.php?course_id=$course_id&status=duplicate");
@@ -54,21 +73,61 @@ if (isset($_POST['update_order'])) {
     $new_order = intval($_POST['new_order'] ?? 0);
 
     if ($course_id > 0 && $curriculum_id > 0 && $new_order > 0) {
-        $orderStmt = db()->prepare("
-            SELECT COUNT(*) FROM uedu_curriculum
-            WHERE course_id = ? AND chapter_order = ? AND id <> ?
+        $maxOrderStmt = db()->prepare("
+            SELECT COALESCE(MAX(chapter_order), 0)
+            FROM uedu_curriculum
+            WHERE course_id = ?
         ");
-        $orderStmt->execute([$course_id, $new_order, $curriculum_id]);
-        if (intval($orderStmt->fetchColumn()) > 0) {
-            header("Location: curriculum.php?course_id=$course_id&status=order_conflict");
+        $maxOrderStmt->execute([$course_id]);
+        $maxOrder = intval($maxOrderStmt->fetchColumn());
+        if ($new_order > $maxOrder) {
+            $new_order = $maxOrder;
+        }
+
+        $currentStmt = db()->prepare("
+            SELECT chapter_order
+            FROM uedu_curriculum
+            WHERE id = ? AND course_id = ?
+        ");
+        $currentStmt->execute([$curriculum_id, $course_id]);
+        $current_order = intval($currentStmt->fetchColumn());
+        if ($current_order <= 0) {
+            header("Location: curriculum.php?course_id=$course_id&status=invalid");
             exit;
         }
 
-        db()->prepare("
-            UPDATE uedu_curriculum
-            SET chapter_order = ?
-            WHERE id = ? AND course_id = ?
-        ")->execute([$new_order, $curriculum_id, $course_id]);
+        $pdo = db();
+        $pdo->beginTransaction();
+        try {
+            if ($new_order !== $current_order) {
+                if ($new_order < $current_order) {
+                    $shiftStmt = $pdo->prepare("
+                        UPDATE uedu_curriculum
+                        SET chapter_order = chapter_order + 1
+                        WHERE course_id = ? AND chapter_order >= ? AND chapter_order < ?
+                    ");
+                    $shiftStmt->execute([$course_id, $new_order, $current_order]);
+                } else {
+                    $shiftStmt = $pdo->prepare("
+                        UPDATE uedu_curriculum
+                        SET chapter_order = chapter_order - 1
+                        WHERE course_id = ? AND chapter_order > ? AND chapter_order <= ?
+                    ");
+                    $shiftStmt->execute([$course_id, $current_order, $new_order]);
+                }
+            }
+
+            $pdo->prepare("
+                UPDATE uedu_curriculum
+                SET chapter_order = ?
+                WHERE id = ? AND course_id = ?
+            ")->execute([$new_order, $curriculum_id, $course_id]);
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            header("Location: curriculum.php?course_id=$course_id&status=invalid");
+            exit;
+        }
 
         header("Location: curriculum.php?course_id=$course_id&status=updated");
         exit;

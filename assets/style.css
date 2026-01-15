@@ -1,211 +1,267 @@
+/* assets/style.css */
+
 /* ===============================
-   기본 Reset
+   Variables & Reset
 ================================ */
+:root {
+    --primary-color: #00C7AE; /* 야놀자/네이버 느낌의 민트 그린 */
+    --primary-dark: #009f8b;
+    --text-color: #333333;
+    --text-gray: #888888;
+    --bg-color: #F5F7FA;
+    --white: #ffffff;
+    --border-color: #e5e5e5;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --header-height: 70px;
+}
+
 * { box-sizing: border-box; }
 body {
     margin: 0;
-    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-    background: #f5f6f8;
-    color: #333;
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif; /* 최신 트렌드 폰트 우선 */
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    word-break: keep-all;
 }
-a { text-decoration: none; color: inherit; }
+a { text-decoration: none; color: inherit; transition: color 0.2s; }
 ul, li { list-style: none; margin: 0; padding: 0; }
+h1, h2, h3, h4, h5 { margin: 0; font-weight: 700; }
+p { margin: 0 0 10px; }
 
 /* ===============================
-   공통 레이아웃
+   Layout
 ================================ */
 .container {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 40px auto;
-    padding: 0 20px;
-}
-.page-title {
-    font-size: 26px;
-    margin-bottom: 25px;
-    border-bottom: 2px solid #222;
-    padding-bottom: 10px;
+    padding: 0 24px;
 }
 
 /* ===============================
-   헤더
+   Header (Modernized)
 ================================ */
 .site-header {
-    background: #222;
-    color: #fff;
-    height: 60px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    height: var(--header-height);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 .header-inner {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 .logo a {
-    font-size: 20px;
-    font-weight: 700;
-    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -0.5px;
 }
 .gnb {
     display: flex;
-    gap: 20px;
+    gap: 32px;
 }
 .gnb a {
-    font-size: 15px;
-    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    color: #444;
 }
 .gnb a:hover {
-    color: #4dd0e1;
+    color: var(--primary-color);
 }
 .user-info {
-    margin-left: 15px;
     font-size: 14px;
-    opacity: .85;
+    color: #666;
+    background: #f0f0f0;
+    padding: 6px 12px;
+    border-radius: 20px;
 }
 
 /* ===============================
-   버튼
+   Typography & Titles
+================================ */
+.page-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+    padding-bottom: 0;
+    border: none; /* 밑줄 제거 */
+    color: #111;
+}
+
+/* ===============================
+   Buttons (Pill Shape)
 ================================ */
 .btn {
-    display: inline-block;
-    padding: 8px 14px;
-    font-size: 14px;
-    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px; /* 약간 둥글게 */
     border: none;
     cursor: pointer;
-    color: #fff;
-    background: #007bff;
+    transition: all 0.2s;
+    line-height: 1;
 }
-.btn-green { background: #28a745; }
-.btn-gray { background: #6c757d; }
-.btn-red { background: #dc3545; }
+.btn:hover { transform: translateY(-1px); }
+.btn-green { background: var(--primary-color); color: #fff; }
+.btn-green:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(0, 199, 174, 0.3); }
+.btn-gray { background: #E9ECEF; color: #495057; }
+.btn-gray:hover { background: #DEE2E6; }
+.btn-red { background: #FF6B6B; color: #fff; }
+.btn-red:hover { background: #FA5252; }
 
 /* ===============================
-   테이블 (게시판/강의실)
+   Cards (Content Area)
+================================ */
+.board-view, .admin-card, .login-box {
+    background: var(--white);
+    padding: 32px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+/* ===============================
+   Tables (Modern List)
 ================================ */
 .board-table {
     width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-}
-.board-table th,
-.board-table td {
-    padding: 12px;
-    border-bottom: 1px solid #e0e0e0;
-    text-align: left;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
 }
 .board-table th {
-    background: #f1f3f5;
+    background: transparent;
     font-weight: 600;
-    border-top: 2px solid #222;
-}
-
-/* ===============================
-   관리자
-================================ */
-.admin-wrap {
-    padding: 30px;
-}
-.admin-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.admin-nav {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-.admin-nav a {
-    padding: 8px 12px;
-    background: #343a40;
-    color: #fff;
-    border-radius: 4px;
+    color: #888;
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
     font-size: 14px;
 }
-.admin-nav a:hover {
-    background: #495057;
-}
-.admin-card {
+.board-table td {
+    padding: 20px 16px;
     background: #fff;
-    padding: 20px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
 }
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.admin-table th,
-.admin-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
+.board-table tr:first-child td { border-top: none; }
+.board-table tr:last-child td { border-bottom: none; }
+.board-table tr:hover td { background: #fbfbfb; }
+
+/* 라운드 처리를 위한 첫번째/마지막 셀 스타일 (선택) */
+.board-table tr td:first-child { border-radius: 8px 0 0 8px; }
+.board-table tr td:last-child { border-radius: 0 8px 8px 0; }
 
 /* ===============================
-   폼
+   Forms
 ================================ */
 .input, .textarea, select {
     width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    transition: border-color 0.2s;
+    background: #fff;
+    outline: none;
 }
-.textarea { min-height: 120px; }
-.row {
-    display: flex;
-    gap: 15px;
-}
-.col { flex: 1; }
-.muted {
-    font-size: 13px;
-    color: #777;
-    margin-bottom: 5px;
+.input:focus, .textarea:focus, select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 199, 174, 0.1);
 }
 
 /* ===============================
-   비디오
+   Admin Layout
+================================ */
+.admin-wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+.admin-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.admin-nav { display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 5px; }
+.admin-nav a {
+    padding: 10px 18px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50px; /* Pill shape */
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    white-space: nowrap;
+}
+.admin-nav a.active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+/* ===============================
+   Badges
+================================ */
+.badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+.badge.on { background: #E6FCF5; color: #0CA678; } /* Mint Badge */
+.badge.off { background: #F1F3F5; color: #868E96; }
+
+/* ===============================
+   Video Player
 ================================ */
 .video-wrapper {
-    background: #000;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background: #000;
 }
 
 /* ===============================
-   반응형
+   Hero Section (Index Page)
 ================================ */
-@media (max-width: 768px) {
-    .header-inner {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .gnb {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .row {
-        flex-direction: column;
-    }
+.hero {
+    background: linear-gradient(135deg, #00C7AE 0%, #009f8b 100%);
+    color: #fff;
+    padding: 80px 0;
+    text-align: center;
+    border-radius: 0 0 40px 40px; /* 하단 둥글게 */
+    margin-bottom: 60px;
 }
+.hero h2 { font-size: 42px; margin-bottom: 16px; letter-spacing: -1px; }
+.hero p { font-size: 18px; opacity: 0.9; margin-bottom: 30px; font-weight: 300; }
+.hero-btns { display: flex; gap: 10px; justify-content: center; }
+.hero .btn { background: #fff; color: var(--primary-color); padding: 14px 32px; font-size: 16px; }
+.hero .btn-outline { background: transparent; border: 2px solid rgba(255,255,255,0.5); color: #fff; }
 
 /* ===============================
    Footer
 ================================ */
 .site-footer {
-    color: #474747;
-    margin-top: 60px;
+    border-top: 1px solid #eee;
+    margin-top: 80px;
+    padding: 40px 0;
+    background: #fff;
+    color: #888;
 }
 .footer-inner {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 24px;
     text-align: center;
-    font-size: 14px;
+    font-size: 13px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .header-inner { flex-wrap: wrap; height: auto; padding: 15px 24px; }
+    .gnb { gap: 15px; width: 100%; justify-content: center; margin-top: 10px; }
+    .hero { padding: 50px 0; border-radius: 0 0 24px 24px; }
+    .hero h2 { font-size: 32px; }
 }

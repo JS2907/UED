@@ -1,267 +1,523 @@
-/* assets/style.css */
+/* ==========================================================================
+   assets/style.css - Hyundai SPM Style (Full Integrated Version + Rolling Banner)
+   ========================================================================== */
 
-/* ===============================
-   Variables & Reset
-================================ */
+/* 1. 폰트 및 기본 설정 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
 :root {
-    --primary-color: #00C7AE; /* 야놀자/네이버 느낌의 민트 그린 */
-    --primary-dark: #009f8b;
-    --text-color: #333333;
-    --text-gray: #888888;
-    --bg-color: #F5F7FA;
-    --white: #ffffff;
-    --border-color: #e5e5e5;
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --radius-sm: 8px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --header-height: 70px;
+    --primary-navy: #002c5f; /* 메인 컬러: 묵직한 네이비 */
+    --primary-dark: #001a38;
+    --text-white: #ffffff;
+    --text-black: #222222;
+    --text-gray: #666666;
+    --bg-light: #f9f9f9;
+    --border-color: #e1e1e1;
+    --header-height: 80px;
 }
 
 * { box-sizing: border-box; }
+
 body {
     margin: 0;
-    font-family: 'Pretendard', 'Noto Sans KR', sans-serif; /* 최신 트렌드 폰트 우선 */
-    background: var(--bg-color);
-    color: var(--text-color);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-black);
     line-height: 1.6;
-    word-break: keep-all;
+    background-color: #fff;
+    word-break: keep-all; /* 단어 짤림 방지 */
 }
-a { text-decoration: none; color: inherit; transition: color 0.2s; }
+
+a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
 ul, li { list-style: none; margin: 0; padding: 0; }
-h1, h2, h3, h4, h5 { margin: 0; font-weight: 700; }
-p { margin: 0 0 10px; }
+img { max-width: 100%; display: block; }
 
-/* ===============================
-   Layout
-================================ */
+
+/* ==========================================================================
+   2. 레이아웃 & 공통 컨테이너
+   ========================================================================== */
 .container {
-    max-width: 1100px;
-    margin: 40px auto;
-    padding: 0 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
 }
 
-/* ===============================
-   Header (Modernized)
-================================ */
-.site-header {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    height: var(--header-height);
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+/* 상단 헤더(fixed) 때문에 가려지는 현상 방지용 여백 */
+body > .container {
+    margin-top: 120px; /* 헤더 80px + 추가여백 40px */
+    margin-bottom: 60px;
+    min-height: 600px; /* 컨텐츠가 적어도 푸터가 바닥에 붙도록 */
 }
-.header-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 100%;
+
+/* 메인페이지용: hero 섹션 바로 뒤에는 여백 제거 */
+body > .hero + .section {
+    margin-top: 0;
+}
+
+
+/* ==========================================================================
+   3. 헤더 (Header) & 네비게이션
+   ========================================================================== */
+.site-header {
+    height: var(--header-height);
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: fixed; /* 상단 고정 */
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
+
+.header-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
 .logo a {
     font-size: 24px;
-    font-weight: 800;
-    color: var(--primary-color);
+    font-weight: 700;
+    color: var(--primary-navy);
     letter-spacing: -0.5px;
 }
+
 .gnb {
     display: flex;
-    gap: 32px;
+    gap: 30px;
 }
+
 .gnb a {
     font-size: 16px;
     font-weight: 500;
-    color: #444;
+    color: #333;
+    padding: 10px 5px;
+    position: relative;
 }
-.gnb a:hover {
-    color: var(--primary-color);
+
+/* 메뉴 호버 시 밑줄 효과 */
+.gnb a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 0; height: 2px;
+    background: var(--primary-navy);
+    transition: 0.3s;
+    transform: translateX(-50%);
 }
+.gnb a:hover::after { width: 100%; }
+.gnb a:hover { color: var(--primary-navy); }
+
 .user-info {
     font-size: 14px;
-    color: #666;
-    background: #f0f0f0;
-    padding: 6px 12px;
-    border-radius: 20px;
+    color: var(--text-gray);
+    background: #f5f5f5;
+    padding: 8px 16px;
+    border-radius: 4px;
 }
 
-/* ===============================
-   Typography & Titles
-================================ */
-.page-title {
-    font-size: 28px;
-    margin-bottom: 30px;
-    padding-bottom: 0;
-    border: none; /* 밑줄 제거 */
-    color: #111;
+
+/* ==========================================================================
+   4. 메인 배너 (Hero Section) - 롤링 배너 & 애니메이션 적용
+   ========================================================================== */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 700px;
+    /* 슬라이더 로딩 전 기본 배경색 */
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-white);
+    overflow: hidden;
+    margin-top: var(--header-height); /* 헤더 높이만큼 띄움 */
 }
 
-/* ===============================
-   Buttons (Pill Shape)
-================================ */
+/* [추가] 슬라이더 컨테이너 */
+.hero-slider {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0; /* 가장 뒤에 배치 */
+}
+
+/* [추가] 각 슬라이드 아이템 (이미지) */
+.slide-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    /* 18초 주기 애니메이션 (3장 기준, 6초씩) */
+    animation: kenBurns 18s infinite;
+}
+
+/* [추가] 슬라이드 시간차 설정 (순서대로 등장) */
+.slide-item:nth-child(1) { animation-delay: 0s; }
+.slide-item:nth-child(2) { animation-delay: 6s; }
+.slide-item:nth-child(3) { animation-delay: 12s; }
+
+/* [추가] 켄번(Ken Burns) 효과: 서서히 확대되며 페이드 */
+@keyframes kenBurns {
+    0% { opacity: 0; transform: scale(1); }
+    5% { opacity: 1; }
+    33.33% { opacity: 1; }
+    38.33% { opacity: 0; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1); }
+}
+
+/* 어두운 오버레이 (텍스트 가독성을 위해 필수) */
+.hero-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* 네이비 톤의 반투명 그라디언트 */
+    background: linear-gradient(135deg, rgba(0, 44, 95, 0.7) 0%, rgba(0, 20, 50, 0.4) 100%);
+    z-index: 1; /* 슬라이더 위에, 텍스트 아래에 배치 */
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2; /* 최상위 배치 */
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+.hero h2 {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.hero p {
+    font-size: 20px;
+    font-weight: 300;
+    opacity: 0.95;
+    margin-bottom: 40px;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+}
+
+
+/* ==========================================================================
+   5. 텍스트 등장 애니메이션 (Fade Up)
+   ========================================================================== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up-1 { opacity: 0; animation: fadeUp 1s ease-out forwards; animation-delay: 0.2s; }
+.fade-up-2 { opacity: 0; animation: fadeUp 1s ease-out forwards; animation-delay: 0.4s; }
+.fade-up-3 { opacity: 0; animation: fadeUp 1s ease-out forwards; animation-delay: 0.6s; }
+
+
+/* ==========================================================================
+   6. 버튼 (Buttons)
+   ========================================================================== */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 20px;
-    font-size: 15px;
-    font-weight: 600;
-    border-radius: 8px; /* 약간 둥글게 */
-    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
-    line-height: 1;
-}
-.btn:hover { transform: translateY(-1px); }
-.btn-green { background: var(--primary-color); color: #fff; }
-.btn-green:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(0, 199, 174, 0.3); }
-.btn-gray { background: #E9ECEF; color: #495057; }
-.btn-gray:hover { background: #DEE2E6; }
-.btn-red { background: #FF6B6B; color: #fff; }
-.btn-red:hover { background: #FA5252; }
-
-/* ===============================
-   Cards (Content Area)
-================================ */
-.board-view, .admin-card, .login-box {
-    background: var(--white);
-    padding: 32px;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
 }
 
-/* ===============================
-   Tables (Modern List)
-================================ */
-.board-table {
+/* 배너 내부 흰색 라인 버튼 */
+.btn-outline-white {
+    border: 1px solid rgba(255,255,255,0.7);
+    color: #fff;
+    background: transparent;
+}
+.btn-outline-white:hover {
+    background: #fff;
+    color: var(--primary-navy);
+    border-color: #fff;
+}
+
+/* 공통 네이비 버튼 */
+.btn-navy, .btn-green {
+    background: var(--primary-navy);
+    color: #fff;
+}
+.btn-navy:hover, .btn-green:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* 회색 버튼 */
+.btn-gray {
+    background: #f1f1f1;
+    color: #444;
+    border: 1px solid #ddd;
+}
+.btn-gray:hover {
+    background: #e0e0e0;
+}
+
+
+/* ==========================================================================
+   7. 카드 & 섹션 (Cards & Sections)
+   ========================================================================== */
+.section {
+    padding: 80px 0;
+}
+.section-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+.section-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    margin-bottom: 10px;
+}
+.section-desc {
+    color: var(--text-gray);
+    font-size: 16px;
+}
+
+/* 그리드 레이아웃 */
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+/* 카드 스타일 */
+.course-card, .board-view {
+    background: #fff;
+    border: 1px solid #eee;
+    transition: 0.3s;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.board-view {
+    padding: 30px;
+    cursor: default; /* 게시판 보기 등은 클릭 안됨 */
+}
+
+.course-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-color: var(--primary-navy);
+}
+
+.card-img-wrap {
+    height: 220px;
+    overflow: hidden;
+    background: #f0f0f0;
+}
+.card-img-wrap img {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: transparent;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.5s;
 }
-.board-table th {
-    background: transparent;
-    font-weight: 600;
+.course-card:hover .card-img-wrap img {
+    transform: scale(1.05);
+}
+
+.card-body {
+    padding: 25px;
+}
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: #333;
+}
+.card-text {
+    font-size: 14px;
     color: #888;
-    padding: 12px 16px;
-    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    height: 42px; /* 2줄 고정 */
+    overflow: hidden;
+}
+.card-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    text-align: right;
+}
+.no-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #ccc;
     font-size: 14px;
 }
-.board-table td {
-    padding: 20px 16px;
-    background: #fff;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 15px;
-}
-.board-table tr:first-child td { border-top: none; }
-.board-table tr:last-child td { border-bottom: none; }
-.board-table tr:hover td { background: #fbfbfb; }
 
-/* 라운드 처리를 위한 첫번째/마지막 셀 스타일 (선택) */
-.board-table tr td:first-child { border-radius: 8px 0 0 8px; }
-.board-table tr td:last-child { border-radius: 0 8px 8px 0; }
 
-/* ===============================
-   Forms
-================================ */
+/* ==========================================================================
+   8. 폼 & 입력창 (Forms)
+   ========================================================================== */
 .input, .textarea, select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 12px;
+    margin-bottom: 10px;
     border: 1px solid #ddd;
-    border-radius: var(--radius-sm);
+    border-radius: 4px;
     font-size: 15px;
-    transition: border-color 0.2s;
     background: #fff;
+    transition: border-color 0.3s;
+}
+
+.input:focus, .textarea:focus, select:focus {
+    border-color: var(--primary-navy);
     outline: none;
 }
-.input:focus, .textarea:focus, select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 199, 174, 0.1);
-}
 
-/* ===============================
-   Admin Layout
-================================ */
-.admin-wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
-.admin-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.admin-nav { display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 5px; }
-.admin-nav a {
-    padding: 10px 18px;
+.login-box {
+    max-width: 450px;
+    margin: 60px auto;
+    padding: 40px;
     background: #fff;
     border: 1px solid #ddd;
-    border-radius: 50px; /* Pill shape */
-    font-size: 14px;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+
+/* ==========================================================================
+   9. 테이블 (Tables)
+   ========================================================================== */
+.board-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 2px solid var(--primary-navy);
+    margin-bottom: 30px;
+}
+
+.board-table th {
+    background: #f8f9fa;
+    color: #333;
     font-weight: 600;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.board-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+    vertical-align: middle;
+}
+
+.board-table tr:hover td {
+    background: #fcfcfc;
+}
+
+/* 페이지 타이틀 공통 스타일 */
+.page-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text-black);
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+}
+
+/* 뱃지 스타일 */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #eee;
     color: #666;
-    white-space: nowrap;
-}
-.admin-nav a.active {
-    background: #333;
-    color: #fff;
-    border-color: #333;
 }
 
-/* ===============================
-   Badges
-================================ */
-.badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; }
-.badge.on { background: #E6FCF5; color: #0CA678; } /* Mint Badge */
-.badge.off { background: #F1F3F5; color: #868E96; }
 
-/* ===============================
-   Video Player
-================================ */
-.video-wrapper {
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    background: #000;
-}
-
-/* ===============================
-   Hero Section (Index Page)
-================================ */
-.hero {
-    background: linear-gradient(135deg, #00C7AE 0%, #009f8b 100%);
-    color: #fff;
-    padding: 80px 0;
-    text-align: center;
-    border-radius: 0 0 40px 40px; /* 하단 둥글게 */
-    margin-bottom: 60px;
-}
-.hero h2 { font-size: 42px; margin-bottom: 16px; letter-spacing: -1px; }
-.hero p { font-size: 18px; opacity: 0.9; margin-bottom: 30px; font-weight: 300; }
-.hero-btns { display: flex; gap: 10px; justify-content: center; }
-.hero .btn { background: #fff; color: var(--primary-color); padding: 14px 32px; font-size: 16px; }
-.hero .btn-outline { background: transparent; border: 2px solid rgba(255,255,255,0.5); color: #fff; }
-
-/* ===============================
-   Footer
-================================ */
+/* ==========================================================================
+   10. 푸터 (Footer) & 기타 아이콘
+   ========================================================================== */
 .site-footer {
-    border-top: 1px solid #eee;
+    background: #222;
+    color: #999;
+    padding: 60px 0;
     margin-top: 80px;
-    padding: 40px 0;
-    background: #fff;
-    color: #888;
-}
-.footer-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px;
     text-align: center;
-    font-size: 13px;
+    font-size: 14px;
 }
 
-/* Mobile */
+/* 스크롤 다운 아이콘 애니메이션 */
+.scroll-down {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    letter-spacing: 2px;
+}
+.mouse-icon {
+    width: 24px;
+    height: 36px;
+    border: 2px solid rgba(255,255,255,0.7);
+    border-radius: 12px;
+    margin: 10px auto 0;
+    position: relative;
+}
+.mouse-icon::after {
+    content: '';
+    position: absolute;
+    top: 6px; left: 50%;
+    width: 2px; height: 6px;
+    background: #fff;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    animation: scrollWheel 2s infinite;
+}
+
+@keyframes scrollWheel {
+    0% { top: 6px; opacity: 1; }
+    100% { top: 18px; opacity: 0; }
+}
+
+
+/* ==========================================================================
+   11. 반응형 (Responsive)
+   ========================================================================== */
 @media (max-width: 768px) {
-    .header-inner { flex-wrap: wrap; height: auto; padding: 15px 24px; }
-    .gnb { gap: 15px; width: 100%; justify-content: center; margin-top: 10px; }
-    .hero { padding: 50px 0; border-radius: 0 0 24px 24px; }
-    .hero h2 { font-size: 32px; }
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+    .hero h2 {
+        font-size: 36px;
+    }
+    .header-inner {
+        padding: 0 15px;
+    }
+    .gnb {
+        gap: 15px;
+        font-size: 14px;
+    }
+    .container {
+        padding: 0 15px;
+    }
 }

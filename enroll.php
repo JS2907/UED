@@ -13,7 +13,7 @@ if ($course_id <= 0) {
 $stmt = db()->prepare("
     SELECT id, title, price
     FROM uedu_courses
-    WHERE id=?
+    WHERE id=? AND is_active = 1
     LIMIT 1
 ");
 $stmt->execute([$course_id]);

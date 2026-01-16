@@ -13,8 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    // [수정] name, role 정보까지 함께 조회
     $stmt = db()->prepare("
-        SELECT id, password
+        SELECT id, username, password, name, role
         FROM uedu_users
         WHERE username = ?
         LIMIT 1
@@ -23,7 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
+        // [수정] 세션에 주요 정보 캐싱 (DB 접속 최소화 목적)
+        $_SESSION['user_id']   = $user['id'];
+        $_SESSION['username']  = $user['username'];
+        $_SESSION['name']      = $user['name'];
+        $_SESSION['role']      = $user['role'];
+        
         header("Location: {$BASE_URL}/myroom.php");
         exit;
     } else {
@@ -40,19 +46,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<div class="container" style="max-width:400px;">
-    <h2 class="page-title">로그인</h2>
+<div class="container" style="max-width:400px; margin-top:100px;">
+    <div class="login-box">
+        <h2 class="page-title" style="text-align:center; margin-bottom:20px;">LOGIN</h2>
 
-    <?php if ($error): ?>
-        <p style="color:red;"><?= htmlspecialchars($error) ?></p>
-    <?php endif; ?>
+        <?php if ($error): ?>
+            <p style="color:#ff4444; text-align:center; margin-bottom:15px;"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
-    <form method="POST">
-        <input class="input" name="username" placeholder="아이디" required>
-        <input class="input" type="password" name="password" placeholder="비밀번호" required style="margin-top:10px;">
-        <button class="btn btn-green" style="margin-top:15px;width:100%;">로그인</button>
-        <a href="/uedu/register.php">회원가입</a>
-    </form>
+        <form method="POST">
+            <input class="input" name="username" placeholder="ID" required>
+            <input class="input" type="password" name="password" placeholder="PASSWORD" required style="margin-top:15px;">
+            <button class="btn btn-green" style="margin-top:25px; width:100%;">로그인</button>
+            <div style="text-align:center; margin-top:15px;">
+                <a href="/uedu/register.php" style="color:#888; font-size:13px;">계정이 없으신가요? 회원가입</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 </body>

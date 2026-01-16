@@ -5,8 +5,8 @@
 ================================ */
 :root {
     /* Korea Univ. Crimson & Dark Grays */
-    --primary-color: #8B0029;
-    --primary-dark: #63001E;
+    --primary-color: #4b7ab1;
+    --primary-dark: rgb(35, 92, 159);;
     --secondary-color: #333333;
     
     --text-color: #222222;
